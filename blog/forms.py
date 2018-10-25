@@ -15,3 +15,8 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ('name', 'email', 'body')
+
+    def save(self, post):
+        self.instance.post = post
+        return super().save()
+

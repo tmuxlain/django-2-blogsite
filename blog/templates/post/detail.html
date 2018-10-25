@@ -22,6 +22,17 @@
     </h2>
 {% endwith %}
 
+<h2>Similar posts</h2>
+{% for post in similar_posts %}
+    <p>
+        <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>   
+    </p>
+{% empty %}
+    No similar posts yet.
+{% endfor %}
+
+<hr>
+<hr>
 {% for comment in comments %}
     <div class="comment">
         <p class="info">

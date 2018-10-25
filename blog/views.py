@@ -53,18 +53,15 @@ def post_detail(request, year, month, day, post):
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
-    # list of active comments for this post
     comments = post.comments.filter(active=True)
     new_comment = None
     comment_form = CommentForm(data=request.POST or None)
 
     if request.method == 'POST':
         if comment_form.is_valid():
-            # Create Comment object but don't save to database yet
-            new_comment = comment_form.save(commit=False)
-            # assign current post to comment before saving to db
-            new_comment.post = post
-            new_comment.save()
+            new_comment = comment_form.save(post=post)
+
+    similar_posts = get_similar_posts(post)
 
     return render(request,
                   'post/detail.html',
@@ -73,11 +70,11 @@ def post_detail(request, year, month, day, post):
                       'comments': comments,
                       'new_comment': new_comment,
                       'comment_form': comment_form,
+                      'similar_posts': similar_posts,
                   })
 
 
 def post_share(request, post_id):
-    # Retrieve post by id
     post = get_object_or_404(Post, id=post_id,
                              status='published')
     sent = False
