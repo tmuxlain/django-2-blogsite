@@ -1,19 +1,50 @@
 from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 
+from taggit.models import Tag
+
 from blog.forms import CommentForm, EmailPostForm
-from blog.models import Comment, Post
+from blog.models import Post
+from blog.utils import get_similar_posts
 
 
 # Create your views here.
 
 
-class PostListView(ListView):
-    queryset = Post.published.all()  # could have used model = Post, django will then use Post.objects.all()
-    context_object_name = 'posts'
-    paginate_by = 3
-    template_name = 'post/list.html'
+def list_posts(request, tag_slug=None):
+    object_list = Post.published.all()
+    tag = None
+
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+
+    paginator = Paginator(object_list, 3)  # 3 posts per page
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range deliver the last page of results
+        posts = paginator.page(paginator.num_pages)
+
+    return render(request,
+                  'post/list.html',
+                  {
+                      'posts': posts,
+                      'page': page,
+                      'tag': tag,
+                  })
+
+
+# class PostListView(ListView):
+#     queryset = Post.published.all()  # could have used model = Post, django will then use Post.objects.all()
+#     context_object_name = 'posts'
+#     paginate_by = 3
+#     template_name = 'post/list.html'
 
 
 def post_detail(request, year, month, day, post):
