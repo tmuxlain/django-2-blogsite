@@ -7,8 +7,7 @@ class EmailPostForm(forms.Form):
     name = forms.CharField(max_length=25)
     email = forms.EmailField()
     to = forms.EmailField()
-    comments = forms.CharField(required=False,
-                               widget=forms.Textarea)
+    comments = forms.CharField(required=False, widget=forms.Textarea)
 
 
 class CommentForm(forms.ModelForm):
@@ -19,4 +18,8 @@ class CommentForm(forms.ModelForm):
     def save(self, post):
         self.instance.post = post
         return super().save()
+
+
+class SearchForm(forms.Form):
+    query = forms.CharField()
 
